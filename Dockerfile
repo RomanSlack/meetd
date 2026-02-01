@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.83-alpine AS builder
+FROM rust:1.85-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconf
@@ -45,4 +45,4 @@ WORKDIR /home/meetd
 EXPOSE 8080
 
 # Default command
-CMD ["meetd", "serve", "--port", "8080", "--db", "/home/meetd/data/meetd.db"]
+CMD ["meetd", "serve", "--port", "8080", "--db", "/data/meetd.db", "--url", "https://meetd.fly.dev"]
