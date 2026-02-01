@@ -267,30 +267,49 @@ pub async fn google_callback(
 <html>
 <head>
     <title>meetd - Login Successful</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {{ font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; padding: 40px; }}
-        .container {{ background: white; border-radius: 12px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
-        h1 {{ color: #22c55e; margin-bottom: 8px; }}
-        .email {{ color: #666; margin-bottom: 24px; }}
+        * {{ box-sizing: border-box; }}
+        body {{ font-family: -apple-system, system-ui, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 40px 20px; margin: 0; }}
+        .container {{ background: white; border-radius: 16px; padding: 40px; max-width: 560px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }}
+        .header {{ text-align: center; margin-bottom: 32px; }}
+        .checkmark {{ width: 64px; height: 64px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }}
+        .checkmark svg {{ width: 32px; height: 32px; stroke: white; stroke-width: 3; fill: none; }}
+        h1 {{ color: #1a1a1a; margin: 0 0 8px; font-size: 24px; }}
+        .email {{ color: #666; margin: 0; }}
         .field {{ margin-bottom: 20px; }}
-        .label {{ font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 6px; }}
-        .value {{ background: #f0f0f0; padding: 12px 16px; border-radius: 6px; font-family: monospace; word-break: break-all; position: relative; }}
-        .copy-btn {{ position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #333; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }}
-        .copy-btn:hover {{ background: #555; }}
-        .instructions {{ background: #f8f9fa; border-left: 4px solid #22c55e; padding: 16px; margin-top: 24px; }}
-        .instructions code {{ background: #e9ecef; padding: 2px 6px; border-radius: 3px; }}
+        .label {{ font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 600; }}
+        .value {{ background: #f5f5f5; padding: 14px 16px; border-radius: 8px; font-family: 'SF Mono', Monaco, monospace; font-size: 14px; word-break: break-all; position: relative; border: 1px solid #e5e5e5; }}
+        .value.has-btn {{ padding-right: 70px; }}
+        .copy-btn {{ position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #22c55e; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; }}
+        .copy-btn:hover {{ background: #16a34a; }}
+        .divider {{ height: 1px; background: #e5e5e5; margin: 28px 0; }}
+        .instructions {{ background: #fafafa; border-radius: 12px; padding: 20px; }}
+        .instructions h3 {{ margin: 0 0 16px; font-size: 14px; color: #333; }}
+        .step {{ margin-bottom: 16px; }}
+        .step:last-child {{ margin-bottom: 0; }}
+        .step-label {{ font-size: 12px; color: #666; margin-bottom: 8px; }}
+        .code-block {{ background: #1a1a1a; color: #e5e5e5; padding: 12px 14px; border-radius: 8px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: nowrap; }}
+        .code-block::-webkit-scrollbar {{ height: 6px; }}
+        .code-block::-webkit-scrollbar-track {{ background: #333; border-radius: 3px; }}
+        .code-block::-webkit-scrollbar-thumb {{ background: #666; border-radius: 3px; }}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Login Successful</h1>
-        <p class="email">Welcome, {email}!</p>
+        <div class="header">
+            <div class="checkmark">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h1>Login Successful</h1>
+            <p class="email">{email}</p>
+        </div>
 
         <div class="field">
             <div class="label">Your API Key</div>
-            <div class="value" id="api-key">
+            <div class="value has-btn">
                 {api_key}
-                <button class="copy-btn" onclick="navigator.clipboard.writeText('{api_key}')">Copy</button>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText('{api_key}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 2000)">Copy</button>
             </div>
         </div>
 
@@ -299,12 +318,18 @@ pub async fn google_callback(
             <div class="value">{user_id}</div>
         </div>
 
+        <div class="divider"></div>
+
         <div class="instructions">
-            <strong>Next steps:</strong><br><br>
-            Use your API key with the REST API:<br>
-            <code>curl https://meetd.fly.dev/v1/inbox -H "Authorization: Bearer {api_key}"</code><br><br>
-            Or save it for the CLI:<br>
-            <code>mkdir -p ~/.config/meetd && echo '{{"api_key":"{api_key}","server_url":"https://meetd.fly.dev","email":"{email}","user_id":"{user_id}"}}' > ~/.config/meetd/config.json</code>
+            <h3>Next Steps</h3>
+            <div class="step">
+                <div class="step-label">Use the REST API:</div>
+                <div class="code-block">curl https://meetd.fly.dev/v1/inbox -H "Authorization: Bearer {api_key}"</div>
+            </div>
+            <div class="step">
+                <div class="step-label">Or save config for CLI:</div>
+                <div class="code-block">mkdir -p ~/.config/meetd && echo '{{"api_key":"{api_key}","server_url":"https://meetd.fly.dev","email":"{email}","user_id":"{user_id}"}}' > ~/.config/meetd/config.json</div>
+            </div>
         </div>
     </div>
 </body>
