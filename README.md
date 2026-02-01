@@ -40,8 +40,11 @@ cargo build --release
 ## Quick Start
 
 ```bash
-# Login (opens browser for Google OAuth - no setup needed!)
+# Login via CLI (opens browser for Google OAuth)
 meetd login
+
+# Or login via browser only (no CLI needed):
+# Visit https://meetd.fly.dev/auth/google and copy your API key
 
 # Find mutual availability
 meetd avail --with alice@example.com --duration 30m --window "2026-02-01..2026-02-07" --json
@@ -70,6 +73,32 @@ meetd accept --proposal prop_xyz789
 | `meetd serve` | Run the API server |
 
 All commands support `--json` for machine-readable output.
+
+## REST API
+
+Agents can also use the API directly without installing the CLI:
+
+```bash
+# Check availability
+curl -X POST https://meetd.fly.dev/v1/availability \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"with_email": "alice@example.com", "duration_minutes": 30, "window_start": "2026-02-01T00:00:00Z", "window_end": "2026-02-07T23:59:59Z"}'
+
+# Create proposal
+curl -X POST https://meetd.fly.dev/v1/proposals \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"to_email": "alice@example.com", "slot_start": "2026-02-03T10:00:00Z", "duration_minutes": 30, "title": "Coffee chat"}'
+
+# List inbox
+curl https://meetd.fly.dev/v1/inbox -H "Authorization: Bearer $API_KEY"
+
+# Accept/decline
+curl -X POST https://meetd.fly.dev/v1/proposals/prop_xyz/accept -H "Authorization: Bearer $API_KEY"
+```
+
+Get your API key by running `meetd login` once. See [skill.md](skill.md) for full API docs.
 
 ## Privacy Levels
 

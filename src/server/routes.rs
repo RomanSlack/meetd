@@ -24,7 +24,7 @@ pub fn create_router(state: Arc<AppState>) -> Router {
         .route("/auth/register", post(handlers::auth::register))
         .route("/auth/google", get(handlers::auth::google_redirect))
         .route("/auth/callback", get(handlers::auth::google_callback))
-        .route("/v1/agent/pubkey/{email}", get(handlers::agent::get_pubkey));
+        .route("/v1/agent/pubkey/:email", get(handlers::agent::get_pubkey));
 
     // Protected routes (require API key)
     let protected_routes = Router::new()
@@ -42,13 +42,13 @@ pub fn create_router(state: Arc<AppState>) -> Router {
             "/v1/proposals/sent",
             get(handlers::proposals::get_sent_proposals),
         )
-        .route("/v1/proposals/{id}", get(handlers::proposals::get_proposal))
+        .route("/v1/proposals/:id", get(handlers::proposals::get_proposal))
         .route(
-            "/v1/proposals/{id}/accept",
+            "/v1/proposals/:id/accept",
             post(handlers::proposals::accept_proposal),
         )
         .route(
-            "/v1/proposals/{id}/decline",
+            "/v1/proposals/:id/decline",
             post(handlers::proposals::decline_proposal),
         )
         .route(

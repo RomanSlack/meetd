@@ -261,7 +261,59 @@ pub async fn google_callback(
                 ))
                 .into_response();
             }
-            Json(RegisterResponse { user_id, api_key }).into_response()
+            // No CLI callback - show web page with API key
+            axum::response::Html(format!(
+                r#"<!DOCTYPE html>
+<html>
+<head>
+    <title>meetd - Login Successful</title>
+    <style>
+        body {{ font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; padding: 40px; }}
+        .container {{ background: white; border-radius: 12px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+        h1 {{ color: #22c55e; margin-bottom: 8px; }}
+        .email {{ color: #666; margin-bottom: 24px; }}
+        .field {{ margin-bottom: 20px; }}
+        .label {{ font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 6px; }}
+        .value {{ background: #f0f0f0; padding: 12px 16px; border-radius: 6px; font-family: monospace; word-break: break-all; position: relative; }}
+        .copy-btn {{ position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #333; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }}
+        .copy-btn:hover {{ background: #555; }}
+        .instructions {{ background: #f8f9fa; border-left: 4px solid #22c55e; padding: 16px; margin-top: 24px; }}
+        .instructions code {{ background: #e9ecef; padding: 2px 6px; border-radius: 3px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login Successful</h1>
+        <p class="email">Welcome, {email}!</p>
+
+        <div class="field">
+            <div class="label">Your API Key</div>
+            <div class="value" id="api-key">
+                {api_key}
+                <button class="copy-btn" onclick="navigator.clipboard.writeText('{api_key}')">Copy</button>
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="label">User ID</div>
+            <div class="value">{user_id}</div>
+        </div>
+
+        <div class="instructions">
+            <strong>Next steps:</strong><br><br>
+            Use your API key with the REST API:<br>
+            <code>curl https://meetd.fly.dev/v1/inbox -H "Authorization: Bearer {api_key}"</code><br><br>
+            Or save it for the CLI:<br>
+            <code>mkdir -p ~/.config/meetd && echo '{{"api_key":"{api_key}","server_url":"https://meetd.fly.dev","email":"{email}","user_id":"{user_id}"}}' > ~/.config/meetd/config.json</code>
+        </div>
+    </div>
+</body>
+</html>"#,
+                email = email,
+                api_key = api_key,
+                user_id = user_id
+            ))
+            .into_response()
         }
         Err(error) => {
             if let Some(callback) = cli_callback {
@@ -272,11 +324,31 @@ pub async fn google_callback(
                 ))
                 .into_response();
             }
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse::new(error)),
-            )
-                .into_response()
+            // No CLI callback - show error page
+            axum::response::Html(format!(
+                r#"<!DOCTYPE html>
+<html>
+<head>
+    <title>meetd - Login Failed</title>
+    <style>
+        body {{ font-family: -apple-system, system-ui, sans-serif; background: #f5f5f5; padding: 40px; text-align: center; }}
+        .container {{ background: white; border-radius: 12px; padding: 40px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+        h1 {{ color: #ef4444; }}
+        .error {{ color: #666; margin-bottom: 24px; }}
+        a {{ color: #22c55e; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login Failed</h1>
+        <p class="error">{error}</p>
+        <p><a href="/auth/google">Try again</a></p>
+    </div>
+</body>
+</html>"#,
+                error = error
+            ))
+            .into_response()
         }
     }
 }

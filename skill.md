@@ -26,13 +26,20 @@ sudo mv meetd /usr/local/bin/
 
 ## Setup
 
-Before using meetd, the user must authenticate (one-time setup):
+Before using meetd, the user must authenticate once to get an API key:
 
+**Option A: Via CLI**
 ```bash
 meetd login
 ```
 
-This opens a browser for Google OAuth and stores credentials locally at `~/.config/meetd/config.json`. No Google Cloud setup required - the server handles OAuth.
+**Option B: Via Browser (no CLI needed)**
+1. Visit https://meetd.fly.dev/auth/google
+2. Login with Google
+3. Copy your API key from the page
+4. Save it: `mkdir -p ~/.config/meetd && echo '{"api_key":"YOUR_KEY","server_url":"https://meetd.fly.dev"}' > ~/.config/meetd/config.json`
+
+No Google Cloud setup required - the server handles OAuth.
 
 ## Commands
 
@@ -206,4 +213,75 @@ meetd inbox --json
 
 # 5. Accept the proposal
 meetd accept --proposal prop_xyz789 --json
+```
+
+## REST API (Alternative to CLI)
+
+Agents can call the API directly without installing the CLI. Base URL: `https://meetd.fly.dev`
+
+### Authentication
+
+All endpoints (except login) require Bearer token:
+```
+Authorization: Bearer mdk_xxxYourApiKeyxxx
+```
+
+To get an API key, the user must complete OAuth login via browser once.
+
+### Endpoints
+
+**Check Availability**
+```bash
+curl -X POST https://meetd.fly.dev/v1/availability \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "with_email": "alice@example.com",
+    "duration_minutes": 30,
+    "window_start": "2026-02-01T00:00:00Z",
+    "window_end": "2026-02-07T23:59:59Z"
+  }'
+```
+
+**Create Proposal**
+```bash
+curl -X POST https://meetd.fly.dev/v1/proposals \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to_email": "alice@example.com",
+    "slot_start": "2026-02-03T10:00:00Z",
+    "duration_minutes": 30,
+    "title": "Coffee chat"
+  }'
+```
+
+**List Inbox**
+```bash
+curl https://meetd.fly.dev/v1/inbox \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+**Accept Proposal**
+```bash
+curl -X POST https://meetd.fly.dev/v1/proposals/prop_xyz789/accept \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+**Decline Proposal**
+```bash
+curl -X POST https://meetd.fly.dev/v1/proposals/prop_xyz789/decline \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+**Get Public Key (for signature verification)**
+```bash
+curl https://meetd.fly.dev/v1/agent/pubkey/alice@example.com
+```
+
+### Response Format
+
+All responses are JSON. Errors include an `error` field:
+```json
+{"error": "Not authorized"}
 ```
