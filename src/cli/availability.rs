@@ -35,8 +35,7 @@ impl std::fmt::Display for AvailResponse {
 pub fn parse_duration(s: &str) -> Result<i32> {
     let s = s.trim().to_lowercase();
     if let Some(mins) = s.strip_suffix('m') {
-        mins.parse::<i32>()
-            .context("Invalid minutes value")
+        mins.parse::<i32>().context("Invalid minutes value")
     } else if let Some(hours) = s.strip_suffix('h') {
         let h: i32 = hours.parse().context("Invalid hours value")?;
         Ok(h * 60)

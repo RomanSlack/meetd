@@ -27,12 +27,7 @@ pub async fn query_availability(
 ) -> Response {
     // Get requester's busy periods
     let requester_busy = if let Some(ref token) = user.google_refresh_token {
-        match GoogleCalendar::new(
-            &state.google_client_id,
-            &state.google_client_secret,
-            token,
-        )
-        .await
+        match GoogleCalendar::new(&state.google_client_id, &state.google_client_secret, token).await
         {
             Ok(cal) => match cal.get_busy_periods(req.window_start, req.window_end).await {
                 Ok(busy) => busy,
@@ -65,12 +60,8 @@ pub async fn query_availability(
     // Get target user's busy periods (if they exist in our system)
     let target_busy = if let Ok(Some(target)) = state.db.get_user_by_email(&req.with_email) {
         if let Some(ref token) = target.google_refresh_token {
-            match GoogleCalendar::new(
-                &state.google_client_id,
-                &state.google_client_secret,
-                token,
-            )
-            .await
+            match GoogleCalendar::new(&state.google_client_id, &state.google_client_secret, token)
+                .await
             {
                 Ok(cal) => cal
                     .get_busy_periods(req.window_start, req.window_end)
@@ -110,10 +101,17 @@ pub async fn query_availability(
         .collect();
 
     // Sort by score descending
-    scored_slots.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
+    scored_slots.sort_by(|a, b| {
+        b.score
+            .partial_cmp(&a.score)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
     // Limit to top 20 slots
     scored_slots.truncate(20);
 
-    Json(AvailabilityResponse { slots: scored_slots }).into_response()
+    Json(AvailabilityResponse {
+        slots: scored_slots,
+    })
+    .into_response()
 }

@@ -88,8 +88,7 @@ impl Database {
                 public_key: row.get(3)?,
                 private_key: row.get(4)?,
                 api_key_hash: row.get(5)?,
-                visibility: Visibility::from_str(&row.get::<_, String>(6)?)
-                    .unwrap_or_default(),
+                visibility: Visibility::parse(&row.get::<_, String>(6)?).unwrap_or_default(),
                 webhook_url: row.get(7)?,
                 webhook_secret: row.get(8)?,
                 created_at: row.get(9)?,
@@ -116,8 +115,7 @@ impl Database {
                 public_key: row.get(3)?,
                 private_key: row.get(4)?,
                 api_key_hash: row.get(5)?,
-                visibility: Visibility::from_str(&row.get::<_, String>(6)?)
-                    .unwrap_or_default(),
+                visibility: Visibility::parse(&row.get::<_, String>(6)?).unwrap_or_default(),
                 webhook_url: row.get(7)?,
                 webhook_secret: row.get(8)?,
                 created_at: row.get(9)?,
@@ -190,8 +188,7 @@ impl Database {
                 public_key: row.get(3)?,
                 private_key: row.get(4)?,
                 api_key_hash: row.get(5)?,
-                visibility: Visibility::from_str(&row.get::<_, String>(6)?)
-                    .unwrap_or_default(),
+                visibility: Visibility::parse(&row.get::<_, String>(6)?).unwrap_or_default(),
                 webhook_url: row.get(7)?,
                 webhook_secret: row.get(8)?,
                 created_at: row.get(9)?,
@@ -251,17 +248,14 @@ impl Database {
                 id: row.get(0)?,
                 from_user_id: row.get(1)?,
                 to_email: row.get(2)?,
-                slot_start: DateTime::from_timestamp(row.get(3)?, 0)
-                    .unwrap_or_else(Utc::now),
+                slot_start: DateTime::from_timestamp(row.get(3)?, 0).unwrap_or_else(Utc::now),
                 duration_minutes: row.get(4)?,
                 title: row.get(5)?,
                 description: row.get(6)?,
                 nonce: row.get(7)?,
-                expires_at: DateTime::from_timestamp(row.get(8)?, 0)
-                    .unwrap_or_else(Utc::now),
+                expires_at: DateTime::from_timestamp(row.get(8)?, 0).unwrap_or_else(Utc::now),
                 signature: row.get(9)?,
-                status: ProposalStatus::from_str(&row.get::<_, String>(10)?)
-                    .unwrap_or_default(),
+                status: ProposalStatus::parse(&row.get::<_, String>(10)?).unwrap_or_default(),
                 created_at: row.get(11)?,
             })
         })
@@ -270,7 +264,11 @@ impl Database {
     }
 
     /// Get proposals for a recipient
-    pub fn get_proposals_for_email(&self, email: &str, status: Option<ProposalStatus>) -> Result<Vec<Proposal>> {
+    pub fn get_proposals_for_email(
+        &self,
+        email: &str,
+        status: Option<ProposalStatus>,
+    ) -> Result<Vec<Proposal>> {
         let conn = self.conn.lock().unwrap();
 
         let (sql, params_vec): (&str, Vec<Box<dyn rusqlite::ToSql>>) = match status {
@@ -291,29 +289,29 @@ impl Database {
         };
 
         let mut stmt = conn.prepare(sql)?;
-        let params_refs: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|p| p.as_ref()).collect();
+        let params_refs: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|p| p.as_ref()).collect();
 
         let proposals = stmt.query_map(params_refs.as_slice(), |row| {
             Ok(Proposal {
                 id: row.get(0)?,
                 from_user_id: row.get(1)?,
                 to_email: row.get(2)?,
-                slot_start: DateTime::from_timestamp(row.get(3)?, 0)
-                    .unwrap_or_else(Utc::now),
+                slot_start: DateTime::from_timestamp(row.get(3)?, 0).unwrap_or_else(Utc::now),
                 duration_minutes: row.get(4)?,
                 title: row.get(5)?,
                 description: row.get(6)?,
                 nonce: row.get(7)?,
-                expires_at: DateTime::from_timestamp(row.get(8)?, 0)
-                    .unwrap_or_else(Utc::now),
+                expires_at: DateTime::from_timestamp(row.get(8)?, 0).unwrap_or_else(Utc::now),
                 signature: row.get(9)?,
-                status: ProposalStatus::from_str(&row.get::<_, String>(10)?)
-                    .unwrap_or_default(),
+                status: ProposalStatus::parse(&row.get::<_, String>(10)?).unwrap_or_default(),
                 created_at: row.get(11)?,
             })
         })?;
 
-        proposals.collect::<Result<Vec<_>, _>>().context("Failed to get proposals")
+        proposals
+            .collect::<Result<Vec<_>, _>>()
+            .context("Failed to get proposals")
     }
 
     /// Get proposals sent by a user
@@ -331,22 +329,21 @@ impl Database {
                 id: row.get(0)?,
                 from_user_id: row.get(1)?,
                 to_email: row.get(2)?,
-                slot_start: DateTime::from_timestamp(row.get(3)?, 0)
-                    .unwrap_or_else(Utc::now),
+                slot_start: DateTime::from_timestamp(row.get(3)?, 0).unwrap_or_else(Utc::now),
                 duration_minutes: row.get(4)?,
                 title: row.get(5)?,
                 description: row.get(6)?,
                 nonce: row.get(7)?,
-                expires_at: DateTime::from_timestamp(row.get(8)?, 0)
-                    .unwrap_or_else(Utc::now),
+                expires_at: DateTime::from_timestamp(row.get(8)?, 0).unwrap_or_else(Utc::now),
                 signature: row.get(9)?,
-                status: ProposalStatus::from_str(&row.get::<_, String>(10)?)
-                    .unwrap_or_default(),
+                status: ProposalStatus::parse(&row.get::<_, String>(10)?).unwrap_or_default(),
                 created_at: row.get(11)?,
             })
         })?;
 
-        proposals.collect::<Result<Vec<_>, _>>().context("Failed to get proposals from user")
+        proposals
+            .collect::<Result<Vec<_>, _>>()
+            .context("Failed to get proposals from user")
     }
 
     /// Update proposal status

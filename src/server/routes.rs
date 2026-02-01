@@ -32,14 +32,29 @@ pub fn create_router(state: Arc<AppState>) -> Router {
         .route("/v1/config", get(handlers::config::get_config))
         .route("/v1/config", patch(handlers::config::update_config))
         // Availability
-        .route("/v1/availability", post(handlers::availability::query_availability))
+        .route(
+            "/v1/availability",
+            post(handlers::availability::query_availability),
+        )
         // Proposals
         .route("/v1/proposals", post(handlers::proposals::create_proposal))
-        .route("/v1/proposals/sent", get(handlers::proposals::get_sent_proposals))
+        .route(
+            "/v1/proposals/sent",
+            get(handlers::proposals::get_sent_proposals),
+        )
         .route("/v1/proposals/{id}", get(handlers::proposals::get_proposal))
-        .route("/v1/proposals/{id}/accept", post(handlers::proposals::accept_proposal))
-        .route("/v1/proposals/{id}/decline", post(handlers::proposals::decline_proposal))
-        .route("/v1/proposals/verify", post(handlers::proposals::verify_proposal))
+        .route(
+            "/v1/proposals/{id}/accept",
+            post(handlers::proposals::accept_proposal),
+        )
+        .route(
+            "/v1/proposals/{id}/decline",
+            post(handlers::proposals::decline_proposal),
+        )
+        .route(
+            "/v1/proposals/verify",
+            post(handlers::proposals::verify_proposal),
+        )
         // Inbox
         .route("/v1/inbox", get(handlers::inbox::list_inbox))
         .route("/v1/inbox/stream", get(handlers::inbox::stream_inbox))
@@ -51,7 +66,10 @@ pub fn create_router(state: Arc<AppState>) -> Router {
         .route("/v1/webhooks/test", post(handlers::webhooks::test_webhook))
         // API key rotation
         .route("/auth/key/rotate", post(handlers::auth::rotate_api_key))
-        .layer(middleware::from_fn_with_state(state.clone(), auth_middleware));
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth_middleware,
+        ));
 
     Router::new()
         .merge(public_routes)

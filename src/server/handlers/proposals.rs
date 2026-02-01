@@ -26,7 +26,10 @@ pub async fn create_proposal(
     Extension(AuthenticatedUser(user)): Extension<AuthenticatedUser>,
     Json(req): Json<CreateProposalRequest>,
 ) -> Response {
-    let proposal_id = format!("prop_{}", Uuid::new_v4().to_string().replace('-', "")[..12].to_string());
+    let proposal_id = format!(
+        "prop_{}",
+        &Uuid::new_v4().to_string().replace('-', "")[..12]
+    );
     let nonce = Uuid::new_v4().to_string();
     let expires_at = Utc::now() + Duration::days(7);
 
@@ -80,7 +83,10 @@ pub async fn create_proposal(
     if let Err(e) = state.db.create_proposal(&proposal) {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse::new(format!("Failed to create proposal: {}", e))),
+            Json(ErrorResponse::new(format!(
+                "Failed to create proposal: {}",
+                e
+            ))),
         )
             .into_response();
     }
@@ -106,7 +112,10 @@ pub async fn create_proposal(
             let webhook_client = WebhookClient::new();
             // Fire and forget - don't block on webhook delivery
             tokio::spawn(async move {
-                if let Err(e) = webhook_client.deliver(&webhook_url, &webhook_secret, &event).await {
+                if let Err(e) = webhook_client
+                    .deliver(&webhook_url, &webhook_secret, &event)
+                    .await
+                {
                     tracing::warn!("Failed to deliver webhook: {}", e);
                 }
             });
@@ -167,7 +176,8 @@ pub async fn get_sent_proposals(
 ) -> Response {
     match state.db.get_proposals_from_user(&user.id) {
         Ok(proposals) => {
-            let inbox: Vec<InboxProposal> = proposals.into_iter().map(InboxProposal::from).collect();
+            let inbox: Vec<InboxProposal> =
+                proposals.into_iter().map(InboxProposal::from).collect();
             Json(serde_json::json!({ "proposals": inbox })).into_response()
         }
         Err(e) => (
@@ -226,7 +236,9 @@ pub async fn accept_proposal(
 
     // Check if proposal has expired
     if proposal.expires_at < Utc::now() {
-        let _ = state.db.update_proposal_status(&id, ProposalStatus::Expired);
+        let _ = state
+            .db
+            .update_proposal_status(&id, ProposalStatus::Expired);
         return (
             StatusCode::BAD_REQUEST,
             Json(ErrorResponse::new("Proposal has expired")),
@@ -239,12 +251,8 @@ pub async fn accept_proposal(
     let mut calendar_link = None;
 
     if let Some(ref token) = user.google_refresh_token {
-        if let Ok(cal) = GoogleCalendar::new(
-            &state.google_client_id,
-            &state.google_client_secret,
-            token,
-        )
-        .await
+        if let Ok(cal) =
+            GoogleCalendar::new(&state.google_client_id, &state.google_client_secret, token).await
         {
             // Get sender email
             let sender_email = if let Ok(Some(sender)) = state.db.get_user(&proposal.from_user_id) {
@@ -269,7 +277,10 @@ pub async fn accept_proposal(
     }
 
     // Update proposal status
-    if let Err(e) = state.db.update_proposal_status(&id, ProposalStatus::Accepted) {
+    if let Err(e) = state
+        .db
+        .update_proposal_status(&id, ProposalStatus::Accepted)
+    {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ErrorResponse::new(e.to_string())),
@@ -284,12 +295,19 @@ pub async fn accept_proposal(
         {
             let event = WebhookEvent::new(
                 WebhookEventType::ProposalAccepted,
-                WebhookEventData::proposal_accepted(id.clone(), user.email.clone(), calendar_link.clone()),
+                WebhookEventData::proposal_accepted(
+                    id.clone(),
+                    user.email.clone(),
+                    calendar_link.clone(),
+                ),
             );
 
             let webhook_client = WebhookClient::new();
             tokio::spawn(async move {
-                if let Err(e) = webhook_client.deliver(&webhook_url, &webhook_secret, &event).await {
+                if let Err(e) = webhook_client
+                    .deliver(&webhook_url, &webhook_secret, &event)
+                    .await
+                {
                     tracing::warn!("Failed to deliver webhook: {}", e);
                 }
             });
@@ -337,13 +355,18 @@ pub async fn decline_proposal(
     if proposal.to_email != user.email {
         return (
             StatusCode::FORBIDDEN,
-            Json(ErrorResponse::new("Not authorized to decline this proposal")),
+            Json(ErrorResponse::new(
+                "Not authorized to decline this proposal",
+            )),
         )
             .into_response();
     }
 
     // Update status
-    if let Err(e) = state.db.update_proposal_status(&id, ProposalStatus::Declined) {
+    if let Err(e) = state
+        .db
+        .update_proposal_status(&id, ProposalStatus::Declined)
+    {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ErrorResponse::new(e.to_string())),
@@ -363,7 +386,10 @@ pub async fn decline_proposal(
 
             let webhook_client = WebhookClient::new();
             tokio::spawn(async move {
-                if let Err(e) = webhook_client.deliver(&webhook_url, &webhook_secret, &event).await {
+                if let Err(e) = webhook_client
+                    .deliver(&webhook_url, &webhook_secret, &event)
+                    .await
+                {
                     tracing::warn!("Failed to deliver webhook: {}", e);
                 }
             });

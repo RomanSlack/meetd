@@ -42,7 +42,10 @@ pub async fn register_webhook(
     // Generate new secret
     let secret = generate_webhook_secret();
 
-    if let Err(e) = state.db.update_user_webhook(&user.id, Some(&req.url), Some(&secret)) {
+    if let Err(e) = state
+        .db
+        .update_user_webhook(&user.id, Some(&req.url), Some(&secret))
+    {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ErrorResponse::new(e.to_string())),

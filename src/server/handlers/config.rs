@@ -56,7 +56,7 @@ pub async fn update_config(
 
     // Update visibility if provided
     if let Some(vis_str) = req.visibility {
-        match Visibility::from_str(&vis_str) {
+        match Visibility::parse(&vis_str) {
             Some(v) => {
                 new_visibility = v;
                 if let Err(e) = state.db.update_user_visibility(&user.id, v) {
@@ -89,11 +89,10 @@ pub async fn update_config(
             (Some(webhook_url), Some(secret))
         };
 
-        if let Err(e) = state.db.update_user_webhook(
-            &user.id,
-            url.as_deref(),
-            secret.as_deref(),
-        ) {
+        if let Err(e) = state
+            .db
+            .update_user_webhook(&user.id, url.as_deref(), secret.as_deref())
+        {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse::new(e.to_string())),

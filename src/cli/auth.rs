@@ -23,12 +23,10 @@ impl std::fmt::Display for LoginResponse {
     }
 }
 
-
 /// Run the login command using server-side OAuth
 pub async fn run_login(server_url: &str, format: OutputFormat) -> Result<()> {
     // Find an available port for the local callback server
-    let listener = TcpListener::bind("127.0.0.1:0")
-        .context("Failed to bind local server")?;
+    let listener = TcpListener::bind("127.0.0.1:0").context("Failed to bind local server")?;
     let port = listener.local_addr()?.port();
     let callback_url = format!("http://localhost:{}", port);
 
@@ -44,7 +42,10 @@ pub async fn run_login(server_url: &str, format: OutputFormat) -> Result<()> {
 
     // Open browser
     if let Err(e) = open::that(&auth_url) {
-        eprintln!("Failed to open browser: {}. Please open the URL manually.", e);
+        eprintln!(
+            "Failed to open browser: {}. Please open the URL manually.",
+            e
+        );
     }
 
     // Set up channel for receiving the result
@@ -180,9 +181,10 @@ fn parse_callback_request(request: &str) -> Result<LoginResponse> {
 
     // Parse query parameters
     let query = path.split('?').nth(1).unwrap_or("");
-    let params: std::collections::HashMap<String, String> = url::form_urlencoded::parse(query.as_bytes())
-        .into_owned()
-        .collect();
+    let params: std::collections::HashMap<String, String> =
+        url::form_urlencoded::parse(query.as_bytes())
+            .into_owned()
+            .collect();
 
     // Check for error
     if let Some(error) = params.get("error") {

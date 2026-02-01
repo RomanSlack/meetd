@@ -26,10 +26,7 @@ pub struct PubkeyResponse {
 }
 
 /// Get a user's public key by email
-pub async fn get_pubkey(
-    State(state): State<Arc<AppState>>,
-    Path(email): Path<String>,
-) -> Response {
+pub async fn get_pubkey(State(state): State<Arc<AppState>>, Path(email): Path<String>) -> Response {
     match state.db.get_user_by_email(&email) {
         Ok(Some(user)) => Json(PubkeyResponse {
             email: user.email,
@@ -171,7 +168,10 @@ pub async fn receive_proposal(
     };
 
     // Create proposal in database
-    let proposal_id = format!("prop_{}", Uuid::new_v4().to_string().replace('-', "")[..12].to_string());
+    let proposal_id = format!(
+        "prop_{}",
+        &Uuid::new_v4().to_string().replace('-', "")[..12]
+    );
     let proposal = Proposal {
         id: proposal_id.clone(),
         from_user_id: from_user_id.clone(),
@@ -190,7 +190,10 @@ pub async fn receive_proposal(
     if let Err(e) = state.db.create_proposal(&proposal) {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse::new(format!("Failed to create proposal: {}", e))),
+            Json(ErrorResponse::new(format!(
+                "Failed to create proposal: {}",
+                e
+            ))),
         )
             .into_response();
     }
@@ -202,12 +205,9 @@ pub async fn receive_proposal(
 
         // Create calendar event
         if let Some(ref token) = user.google_refresh_token {
-            if let Ok(cal) = GoogleCalendar::new(
-                &state.google_client_id,
-                &state.google_client_secret,
-                token,
-            )
-            .await
+            if let Ok(cal) =
+                GoogleCalendar::new(&state.google_client_id, &state.google_client_secret, token)
+                    .await
             {
                 if let Ok(event) = cal
                     .create_event(
@@ -225,7 +225,10 @@ pub async fn receive_proposal(
         }
 
         // Update status
-        if let Err(e) = state.db.update_proposal_status(&proposal_id, ProposalStatus::Accepted) {
+        if let Err(e) = state
+            .db
+            .update_proposal_status(&proposal_id, ProposalStatus::Accepted)
+        {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse::new(e.to_string())),
@@ -249,7 +252,9 @@ pub async fn receive_proposal(
 
                 let webhook_client = WebhookClient::new();
                 tokio::spawn(async move {
-                    if let Err(e) = webhook_client.deliver(&webhook_url, &webhook_secret, &event).await
+                    if let Err(e) = webhook_client
+                        .deliver(&webhook_url, &webhook_secret, &event)
+                        .await
                     {
                         tracing::warn!("Failed to deliver webhook: {}", e);
                     }

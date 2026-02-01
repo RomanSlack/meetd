@@ -35,16 +35,11 @@ impl AppState {
 }
 
 /// Run the API server
-pub async fn run_server(
-    addr: SocketAddr,
-    db_path: &str,
-    server_url: &str,
-) -> Result<()> {
+pub async fn run_server(addr: SocketAddr, db_path: &str, server_url: &str) -> Result<()> {
     // Get Google OAuth credentials
-    let google_client_id = std::env::var("GOOGLE_CLIENT_ID")
-        .unwrap_or_else(|_| "".to_string());
-    let google_client_secret = std::env::var("GOOGLE_CLIENT_SECRET")
-        .unwrap_or_else(|_| "".to_string());
+    let google_client_id = std::env::var("GOOGLE_CLIENT_ID").unwrap_or_else(|_| "".to_string());
+    let google_client_secret =
+        std::env::var("GOOGLE_CLIENT_SECRET").unwrap_or_else(|_| "".to_string());
 
     // Open database
     let db = Database::open(db_path)?;

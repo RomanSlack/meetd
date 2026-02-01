@@ -21,7 +21,7 @@ impl Visibility {
         }
     }
 
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s {
             "busy_only" => Some(Visibility::BusyOnly),
             "masked" => Some(Visibility::Masked),
@@ -91,7 +91,10 @@ pub struct LocalConfig {
 impl LocalConfig {
     pub fn config_path() -> std::path::PathBuf {
         let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-        std::path::PathBuf::from(home).join(".config").join("meetd").join("config.json")
+        std::path::PathBuf::from(home)
+            .join(".config")
+            .join("meetd")
+            .join("config.json")
     }
 
     pub fn load() -> anyhow::Result<Self> {

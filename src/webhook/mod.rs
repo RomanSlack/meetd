@@ -53,8 +53,7 @@ impl WebhookClient {
     /// Sign a payload with HMAC-SHA256
     fn sign(&self, payload: &str, timestamp: &str, secret: &str) -> Result<String> {
         let message = format!("{}.{}", timestamp, payload);
-        let mut mac =
-            HmacSha256::new_from_slice(secret.as_bytes()).context("Invalid HMAC key")?;
+        let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).context("Invalid HMAC key")?;
         mac.update(message.as_bytes());
         let result = mac.finalize();
         Ok(hex::encode(result.into_bytes()))
@@ -75,8 +74,7 @@ impl WebhookClient {
         }
 
         let message = format!("{}.{}", timestamp, payload);
-        let mut mac =
-            HmacSha256::new_from_slice(secret.as_bytes()).context("Invalid HMAC key")?;
+        let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).context("Invalid HMAC key")?;
         mac.update(message.as_bytes());
         let expected = hex::encode(mac.finalize().into_bytes());
 

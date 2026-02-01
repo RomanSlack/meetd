@@ -32,10 +32,7 @@ pub async fn list_inbox(
     // Expire old proposals first
     let _ = state.db.expire_old_proposals();
 
-    let status = query
-        .status
-        .as_deref()
-        .and_then(ProposalStatus::from_str);
+    let status = query.status.as_deref().and_then(ProposalStatus::parse);
 
     match state.db.get_proposals_for_email(&user.email, status) {
         Ok(proposals) => {

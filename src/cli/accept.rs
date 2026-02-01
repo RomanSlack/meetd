@@ -24,7 +24,10 @@ pub async fn run_accept(proposal_id: &str, format: OutputFormat) -> Result<()> {
 
     let client = get_api_client();
     let resp = client
-        .post(format!("{}/v1/proposals/{}/accept", server_url, proposal_id))
+        .post(format!(
+            "{}/v1/proposals/{}/accept",
+            server_url, proposal_id
+        ))
         .header("Authorization", format!("Bearer {}", api_key))
         .send()
         .await

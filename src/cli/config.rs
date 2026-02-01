@@ -70,7 +70,7 @@ pub async fn run_config_show(format: OutputFormat) -> Result<()> {
 
 /// Set visibility level
 pub async fn run_config_visibility(visibility: &str, format: OutputFormat) -> Result<()> {
-    let vis = Visibility::from_str(visibility)
+    let vis = Visibility::parse(visibility)
         .ok_or_else(|| anyhow::anyhow!("Invalid visibility. Use: busy_only, masked, or full"))?;
 
     let api_key = get_api_key()?;

@@ -64,7 +64,10 @@ impl TokenManager {
             expires_in: i64,
         }
 
-        let tokens: TokenResponse = resp.json().await.context("Failed to parse token response")?;
+        let tokens: TokenResponse = resp
+            .json()
+            .await
+            .context("Failed to parse token response")?;
 
         self.access_token = Some(tokens.access_token.clone());
         self.expires_at = Some(Utc::now() + chrono::Duration::seconds(tokens.expires_in));
@@ -75,11 +78,7 @@ impl TokenManager {
 
 impl GoogleCalendar {
     /// Create a new Google Calendar client with the given refresh token
-    pub async fn new(
-        client_id: &str,
-        client_secret: &str,
-        refresh_token: &str,
-    ) -> Result<Self> {
+    pub async fn new(client_id: &str, client_secret: &str, refresh_token: &str) -> Result<Self> {
         let client = reqwest::Client::new();
         let token_manager = Arc::new(RwLock::new(TokenManager::new(
             client_id.to_string(),
@@ -99,10 +98,7 @@ impl GoogleCalendar {
     }
 
     /// Perform the OAuth flow and return credentials
-    pub async fn oauth_flow(
-        client_id: &str,
-        client_secret: &str,
-    ) -> Result<OAuthCredentials> {
+    pub async fn oauth_flow(client_id: &str, client_secret: &str) -> Result<OAuthCredentials> {
         use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
         use tokio::net::TcpListener;
 
@@ -140,7 +136,10 @@ impl GoogleCalendar {
         }
 
         // Wait for callback
-        let (mut socket, _) = listener.accept().await.context("Failed to accept connection")?;
+        let (mut socket, _) = listener
+            .accept()
+            .await
+            .context("Failed to accept connection")?;
         let mut reader = BufReader::new(&mut socket);
         let mut request_line = String::new();
         reader.read_line(&mut request_line).await?;
@@ -150,18 +149,16 @@ impl GoogleCalendar {
             .split_whitespace()
             .nth(1)
             .and_then(|path| {
-                path.split('?')
-                    .nth(1)
-                    .and_then(|query| {
-                        query.split('&').find_map(|param| {
-                            let mut parts = param.split('=');
-                            if parts.next() == Some("code") {
-                                parts.next().map(|s| s.to_string())
-                            } else {
-                                None
-                            }
-                        })
+                path.split('?').nth(1).and_then(|query| {
+                    query.split('&').find_map(|param| {
+                        let mut parts = param.split('=');
+                        if parts.next() == Some("code") {
+                            parts.next().map(|s| s.to_string())
+                        } else {
+                            None
+                        }
                     })
+                })
             })
             .context("No authorization code in callback")?;
 
@@ -196,11 +193,16 @@ impl GoogleCalendar {
             refresh_token: Option<String>,
         }
 
-        let tokens: TokenResponse = resp.json().await.context("Failed to parse token response")?;
+        let tokens: TokenResponse = resp
+            .json()
+            .await
+            .context("Failed to parse token response")?;
 
         Ok(OAuthCredentials {
             access_token: Some(tokens.access_token),
-            refresh_token: tokens.refresh_token.context("No refresh token in response")?,
+            refresh_token: tokens
+                .refresh_token
+                .context("No refresh token in response")?,
         })
     }
 
@@ -288,7 +290,10 @@ impl CalendarProvider for GoogleCalendar {
             end: DateTime<Utc>,
         }
 
-        let response: FreeBusyResponse = resp.json().await.context("Failed to parse free/busy response")?;
+        let response: FreeBusyResponse = resp
+            .json()
+            .await
+            .context("Failed to parse free/busy response")?;
 
         let mut busy_periods = Vec::new();
 
@@ -347,7 +352,11 @@ impl CalendarProvider for GoogleCalendar {
             description: description.map(|s| s.to_string()),
             start: EventDateTime { date_time: start },
             end: EventDateTime { date_time: end },
-            attendees: attendee_email.map(|e| vec![Attendee { email: e.to_string() }]),
+            attendees: attendee_email.map(|e| {
+                vec![Attendee {
+                    email: e.to_string(),
+                }]
+            }),
         };
 
         let resp = self
@@ -371,7 +380,10 @@ impl CalendarProvider for GoogleCalendar {
             html_link: Option<String>,
         }
 
-        let created: EventResponse = resp.json().await.context("Failed to parse event response")?;
+        let created: EventResponse = resp
+            .json()
+            .await
+            .context("Failed to parse event response")?;
 
         Ok(CreatedEvent {
             id: created.id.unwrap_or_default(),

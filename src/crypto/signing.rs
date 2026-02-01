@@ -19,7 +19,9 @@ impl Keypair {
 
     /// Create from a base64-encoded private key
     pub fn from_private_key_base64(private_key: &str) -> Result<Self> {
-        let bytes = BASE64.decode(private_key).context("Invalid base64 private key")?;
+        let bytes = BASE64
+            .decode(private_key)
+            .context("Invalid base64 private key")?;
         let key_bytes: [u8; 32] = bytes
             .try_into()
             .map_err(|_| anyhow::anyhow!("Invalid private key length"))?;
@@ -60,7 +62,9 @@ pub struct PublicKey {
 impl PublicKey {
     /// Create from a base64-encoded public key
     pub fn from_base64(public_key: &str) -> Result<Self> {
-        let bytes = BASE64.decode(public_key).context("Invalid base64 public key")?;
+        let bytes = BASE64
+            .decode(public_key)
+            .context("Invalid base64 public key")?;
         let key_bytes: [u8; 32] = bytes
             .try_into()
             .map_err(|_| anyhow::anyhow!("Invalid public key length"))?;
@@ -71,7 +75,9 @@ impl PublicKey {
 
     /// Verify a signature
     pub fn verify(&self, message: &str, signature_base64: &str) -> Result<bool> {
-        let signature_bytes = BASE64.decode(signature_base64).context("Invalid base64 signature")?;
+        let signature_bytes = BASE64
+            .decode(signature_base64)
+            .context("Invalid base64 signature")?;
         let sig_bytes: [u8; 64] = signature_bytes
             .try_into()
             .map_err(|_| anyhow::anyhow!("Invalid signature length"))?;

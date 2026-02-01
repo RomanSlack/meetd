@@ -71,7 +71,8 @@ pub async fn google_redirect(
     let redirect_uri = format!("{}/auth/callback", state.server_url);
 
     // Encode CLI callback URL in state parameter if provided
-    let state_param = query.cli_callback
+    let state_param = query
+        .cli_callback
         .map(|cb| urlencoding::encode(&cb).to_string())
         .unwrap_or_default();
 
@@ -107,7 +108,8 @@ pub async fn google_callback(
     Query(query): Query<CallbackQuery>,
 ) -> Response {
     // Decode CLI callback URL from state parameter
-    let cli_callback = query.state
+    let cli_callback = query
+        .state
         .as_ref()
         .filter(|s| !s.is_empty())
         .map(|s| urlencoding::decode(s).unwrap_or_default().to_string());
@@ -118,7 +120,8 @@ pub async fn google_callback(
                 "{}?error={}",
                 callback,
                 urlencoding::encode(&error)
-            )).into_response();
+            ))
+            .into_response();
         }
         return (StatusCode::BAD_REQUEST, Json(ErrorResponse::new(error))).into_response();
     }
@@ -132,13 +135,10 @@ pub async fn google_callback(
                     "{}?error={}",
                     callback,
                     urlencoding::encode(error)
-                )).into_response();
+                ))
+                .into_response();
             }
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(ErrorResponse::new(error)),
-            )
-                .into_response()
+            return (StatusCode::BAD_REQUEST, Json(ErrorResponse::new(error))).into_response();
         }
     };
 
@@ -165,24 +165,29 @@ pub async fn google_callback(
                     "{}?error={}",
                     callback,
                     urlencoding::encode(&error)
-                )).into_response();
+                ))
+                .into_response();
             }
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse::new(error)),
             )
-                .into_response()
+                .into_response();
         }
     };
 
     if !resp.status().is_success() {
-        let error = format!("Token exchange failed: {}", resp.text().await.unwrap_or_default());
+        let error = format!(
+            "Token exchange failed: {}",
+            resp.text().await.unwrap_or_default()
+        );
         if let Some(callback) = cli_callback {
             return Redirect::temporary(&format!(
                 "{}?error={}",
                 callback,
                 urlencoding::encode(&error)
-            )).into_response();
+            ))
+            .into_response();
         }
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -206,13 +211,14 @@ pub async fn google_callback(
                     "{}?error={}",
                     callback,
                     urlencoding::encode(&error)
-                )).into_response();
+                ))
+                .into_response();
             }
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse::new(error)),
             )
-                .into_response()
+                .into_response();
         }
     };
 
@@ -226,13 +232,14 @@ pub async fn google_callback(
                     "{}?error={}",
                     callback,
                     urlencoding::encode(&error)
-                )).into_response();
+                ))
+                .into_response();
             }
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse::new(error)),
             )
-                .into_response()
+                .into_response();
         }
     };
 
@@ -251,7 +258,8 @@ pub async fn google_callback(
                     urlencoding::encode(&api_key),
                     urlencoding::encode(&email),
                     urlencoding::encode(&user_id)
-                )).into_response();
+                ))
+                .into_response();
             }
             Json(RegisterResponse { user_id, api_key }).into_response()
         }
@@ -261,7 +269,8 @@ pub async fn google_callback(
                     "{}?error={}",
                     callback,
                     urlencoding::encode(&error)
-                )).into_response();
+                ))
+                .into_response();
             }
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -284,10 +293,14 @@ async fn register_user_internal(
         let api_key = generate_api_key();
         let api_key_hash = hash_api_key(&api_key).map_err(|e| e.to_string())?;
 
-        state.db.update_user_api_key_hash(&existing.id, &api_key_hash)
+        state
+            .db
+            .update_user_api_key_hash(&existing.id, &api_key_hash)
             .map_err(|e| e.to_string())?;
 
-        state.db.update_user_refresh_token(&existing.id, Some(refresh_token))
+        state
+            .db
+            .update_user_refresh_token(&existing.id, Some(refresh_token))
             .map_err(|e| e.to_string())?;
 
         return Ok((existing.id, api_key));

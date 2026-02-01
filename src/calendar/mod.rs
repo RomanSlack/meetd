@@ -99,7 +99,7 @@ pub fn score_slot(slot: &TimeSlot, now: DateTime<Utc>) -> f64 {
 
     // Prefer slots that are not too soon (give time to prepare)
     let hours_until = (slot.start - now).num_hours();
-    if hours_until >= 24 && hours_until <= 72 {
+    if (24..=72).contains(&hours_until) {
         score += 0.1;
     } else if hours_until >= 4 {
         score += 0.05;
