@@ -2,8 +2,18 @@
 name = "meetd"
 version = "0.1.0"
 edition = "2021"
-description = "Agent-to-Agent Meeting Scheduler"
+description = "Agent-to-Agent Meeting Scheduler - Let your AI schedule meetings with other AIs"
 license = "Apache-2.0"
+repository = "https://github.com/RomanSlack/meetd"
+homepage = "https://github.com/RomanSlack/meetd"
+readme = "README.md"
+keywords = ["ai", "agent", "calendar", "scheduling", "meeting"]
+categories = ["command-line-utilities", "web-programming"]
+rust-version = "1.75"
+
+[[bin]]
+name = "meetd"
+path = "src/main.rs"
 
 [dependencies]
 # CLI

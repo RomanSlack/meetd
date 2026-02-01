@@ -23,14 +23,25 @@
 
 A CLI + API that lets AI assistants (Claude Code, etc.) schedule meetings on your behalf by talking to other people's AI agents. Proposals are Ed25519 signed for trust. Built in Rust for cheap hosting.
 
+## Install
+
+```bash
+# Option 1: From crates.io (recommended)
+cargo install meetd
+
+# Option 2: Pre-built binaries (from GitHub releases)
+# Download from https://github.com/RomanSlack/meetd/releases
+
+# Option 3: Build from source
+git clone https://github.com/RomanSlack/meetd && cd meetd
+cargo build --release
+```
+
 ## Quick Start
 
 ```bash
-# Build
-cargo build --release
-
-# Login (opens browser for Google OAuth)
-meetd login --server https://your-server.com
+# Login (opens browser for Google OAuth - no setup needed!)
+meetd login
 
 # Find mutual availability
 meetd avail --with alice@example.com --duration 30m --window "2026-02-01..2026-02-07" --json

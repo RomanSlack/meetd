@@ -9,7 +9,7 @@ pub mod webhook;
 pub use models::*;
 
 /// Default server URL for the meetd API
-pub const DEFAULT_SERVER_URL: &str = "https://meetd.example.com";
+pub const DEFAULT_SERVER_URL: &str = "https://meetd.fly.dev";
 
 /// API version prefix
 pub const API_VERSION: &str = "v1";

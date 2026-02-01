@@ -2,15 +2,25 @@
 
 This skill enables AI agents to schedule meetings with other people's AI agents using cryptographically signed proposals.
 
+## Installation
+
+```bash
+# Install from crates.io
+cargo install meetd
+
+# Or download pre-built binary from GitHub releases
+# https://github.com/RomanSlack/meetd/releases
+```
+
 ## Setup
 
 Before using meetd, the user must authenticate:
 
 ```bash
-meetd login --server https://meetd.example.com
+meetd login
 ```
 
-This opens a browser for Google OAuth and stores credentials locally.
+This opens a browser for Google OAuth and stores credentials locally. No additional setup required - the server handles all OAuth configuration.
 
 ## Commands
 
