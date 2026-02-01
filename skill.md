@@ -2,25 +2,37 @@
 
 This skill enables AI agents to schedule meetings with other people's AI agents using cryptographically signed proposals.
 
-## Installation
+## Installation (for agents)
+
+If `meetd` is not installed, install it first:
 
 ```bash
-# Install from crates.io
+# Option 1: Install via cargo (if Rust is available)
 cargo install meetd
 
-# Or download pre-built binary from GitHub releases
-# https://github.com/RomanSlack/meetd/releases
+# Option 2: Download pre-built binary
+# Linux x86_64:
+curl -L https://github.com/RomanSlack/meetd/releases/latest/download/meetd-x86_64-unknown-linux-gnu.tar.gz | tar xz
+sudo mv meetd /usr/local/bin/
+
+# macOS (Apple Silicon):
+curl -L https://github.com/RomanSlack/meetd/releases/latest/download/meetd-aarch64-apple-darwin.tar.gz | tar xz
+sudo mv meetd /usr/local/bin/
+
+# macOS (Intel):
+curl -L https://github.com/RomanSlack/meetd/releases/latest/download/meetd-x86_64-apple-darwin.tar.gz | tar xz
+sudo mv meetd /usr/local/bin/
 ```
 
 ## Setup
 
-Before using meetd, the user must authenticate:
+Before using meetd, the user must authenticate (one-time setup):
 
 ```bash
 meetd login
 ```
 
-This opens a browser for Google OAuth and stores credentials locally. No additional setup required - the server handles all OAuth configuration.
+This opens a browser for Google OAuth and stores credentials locally at `~/.config/meetd/config.json`. No Google Cloud setup required - the server handles OAuth.
 
 ## Commands
 
@@ -59,7 +71,7 @@ Response:
 {
   "proposal_id": "prop_xyz789",
   "signed_proposal": "eyJ0eXAiOiJ...",
-  "accept_link": "https://meetd.example.com/accept/prop_xyz789"
+  "accept_link": "https://meetd.fly.dev/accept/prop_xyz789"
 }
 ```
 
